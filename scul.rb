@@ -36,7 +36,6 @@ DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/scul.sql
 
 get '/' do
   response['Cache-Control'] = 'public, max-age=86400'
-  content_type 'text/plain'
   '<img src="mus_musculus.jpg" alt="mus musculus" />'
 end
 
