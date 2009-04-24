@@ -11,7 +11,7 @@ end
 class Link
   include DataMapper::Resource
   property :id, Serial
-  property :url, String, :index=>true
+  property :url, String, :index=>true, :length=>(7..255)
 
   @@affine = Affine::Cipher.new(60466169, 12034710206, 81268112)
 
