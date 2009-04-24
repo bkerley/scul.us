@@ -65,9 +65,13 @@ post '/' do
   return forbid unless valid_url
 
   l = Link.first_or_create :url=>valid_url
-  l.save
+  return failure if l.new_record? && !l.save
 
   "http://scul.us/#{l.code}"
+end
+
+def failure
+  halt 500, 'internal error'
 end
 
 def unfound
