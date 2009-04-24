@@ -4,7 +4,9 @@ require 'datamapper'
 require 'openssl'
 require 'affine'
 
-Pubkey ||= OpenSSL::PKey::RSA.new(File.read('scul.pub'))
+unless defined? Pubkey
+  Pubkey = OpenSSL::PKey::RSA.new(File.read('scul.pub'))
+end
 
 class Link
   include DataMapper::Resource
