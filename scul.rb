@@ -30,7 +30,7 @@ class Link
 end
 
 DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/scul.sqlite3")
-DataMapper.auto_upgrade!
+#DataMapper.auto_upgrade!
 
 get '/' do
   response['Cache-Control'] = 'public, max-age=86400'
