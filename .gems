@@ -1,0 +1,4 @@
+sinatra
+datamapper
+do_postgres
+bkerley-affine :source=>'http://gems.github.com'
