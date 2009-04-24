@@ -29,14 +29,18 @@ class Link
   end
 end
 
-DataMapper.setup(:default, ENV['DATABASE_URL'] || 'sqlite3://my.db')
+DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite3://#{Dir.pwd}/scul.sqlite3")
 DataMapper.auto_upgrade!
 
 get '/' do
+  response['Cache-Control'] = 'public, max-age=86400'
+  content_type 'text/plain'
   '<img src="mus_musculus.jpg" alt="mus musculus" />'
 end
 
 get '/u/:code' do |code|
+  response['Cache-Control'] = 'public, max-age=86400'
+  content_type 'text/plain'
   l = Link.find_by_code code
   return unfound unless l
 
@@ -44,6 +48,8 @@ get '/u/:code' do |code|
 end
 
 get '/:code' do |code|
+  response['Cache-Control'] = 'public, max-age=86400'
+  content_type 'text/plain'
   l = Link.find_by_code code
   return unfound unless l
 
