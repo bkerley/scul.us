@@ -4,9 +4,7 @@ require 'datamapper'
 require 'openssl'
 require 'affine'
 
-DataMapper.setup(:default, ENV['DATABASE_URL'] || 'sqlite3://my.db')
-
-Pubkey = OpenSSL::PKey::RSA.new(File.read('scul.pub'))
+Pubkey ||= OpenSSL::PKey::RSA.new(File.read('scul.pub'))
 
 class Link
   include DataMapper::Resource
@@ -31,6 +29,7 @@ class Link
   end
 end
 
+DataMapper.setup(:default, ENV['DATABASE_URL'] || 'sqlite3://my.db')
 DataMapper.auto_upgrade!
 
 get '/' do
