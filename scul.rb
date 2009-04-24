@@ -65,7 +65,7 @@ post '/' do
   return forbid unless valid_url
 
   l = Link.first_or_create :url=>valid_url
-  if l.new_record && !l.save
+  if l.new_record? && !l.save
     $stderr.puts l.errors.join("\n")
     return failure
   end
