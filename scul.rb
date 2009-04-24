@@ -2,25 +2,70 @@ require 'rubygems'
 require 'sinatra'
 require 'datamapper'
 require 'openssl'
+require 'affine'
+
 DataMapper.setup(:default, ENV['DATABASE_URL'] || 'sqlite3://my.db')
 
-pubkey = OpenSSL::PKey::RSA.new(File.read('scul.pub'))
+Pubkey = OpenSSL::PKey::RSA.new(File.read('scul.pub'))
 
 class Link
   include DataMapper::Resource
-  property :id, Integer, :serial=>true, :key=>true
-  property :link, String
+  property :id, Serial
+  property :url, String, :index=>true
+
+  @@affine = Affine::Cipher.new(60466169, 12034710206, 81268112)
+
+  def self.find_by_code(code)
+    return nil unless code.is_a? String
+    link_id = @@affine.decipher(code.to_i(36))
+    link = get link_id
+    return nil unless link && link.code == code
+
+    link
+  rescue Affine::RangeError
+    nil
+  end
+
+  def code
+    @@affine.encipher(self.id).to_s(36)
+  end
 end
+
+DataMapper.auto_upgrade!
 
 get '/' do
   '<img src="mus_musculus.jpg" alt="mus musculus" />'
 end
 
+get '/u/:code' do |code|
+  l = Link.find_by_code code
+  return unfound unless l
+
+  "http://scul.us/#{l.code} => #{l.url}"
+end
+
+get '/:code' do |code|
+  l = Link.find_by_code code
+  return unfound unless l
+
+  response['Location'] = l.url
+  halt 301, "thanks for using scul.us"
+end
+
 post '/' do
+  content_type 'text/plain'
+
   valid_url = decrypt params
-  forbid unless valid_url
+  return forbid unless valid_url
 
+  l = Link.first_or_create :url=>valid_url
+  l.save
 
+  "http://scul.us/#{l.code}"
+end
+
+def unfound
+  halt 404, 'not found'
 end
 
 def forbid
@@ -28,8 +73,9 @@ def forbid
 end
 
 def decrypt(params)
-  plaintext = pubkey.public_decrypt params[:url]
+  plaintext = Pubkey.public_decrypt params[:url]
   false unless plaintext =~ /^https?:\/\//
-rescue
+  plaintext
+rescue Exception => e
   false
 end
